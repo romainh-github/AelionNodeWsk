@@ -3,12 +3,12 @@ Server websocket with node
 
 Install instructions:
 
-$: cd node-websocket
+$: cd [YourFolder]
 $: npm init
-$: npm i ws express
+$: npm i ws express --save
 
 Check if typescript package is already installed:
-$: npm list typescript
+$: npm list -g typescript
 
 If not:
 $: npm i typescript -g
