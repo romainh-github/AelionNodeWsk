@@ -15,17 +15,31 @@ const server = http.createServer(app);
 const wss = new WebSocket.Server({ server });
 // websocket server listenes to events
 wss.on('connection', (ws) => {
+    // Create empty any variable to send clients data as a json
+    let envelop = {};
     //if connection is ok, and the server receive a message
     ws.on('message', (message) => {
         // display message in the console and return a message to the client
-        console.log('Reception: %s', message);
-        ws.send(`Hello, you just sent -> ${message}`);
+        console.log('Reception: %s [%d]', message, new Date());
+        //add dynamically an attribute message to the object envelop and give it the value message: any
+        envelop.message = 'This message : ' + message + ' was received.';
+        // echo for transmitter 
+        ws.send(JSON.stringify(envelop));
+        //Broadcast to all clients except the transmitter
+        wss.clients.forEach(client => {
+            // if it is not the transmitter
+            if (client != ws) {
+                envelop.message = 'New message : ' + message;
+                client.send(JSON.stringify(envelop));
+            }
+        });
     });
     // Immediately send a message to connected clients
-    ws.send('Hello, I am the websocket server');
+    envelop.message = 'Welcome to the chat';
+    ws.send(JSON.stringify(envelop));
 });
 //start server
 server.listen(process.env.PORT || 8999, () => {
-    console.log(`Server starting adress on : ${server.address()} :)`);
+    console.log(`Server starting adress on : ${server.address().toString()} :)`);
 });
 //# sourceMappingURL=ws.server.js.map
