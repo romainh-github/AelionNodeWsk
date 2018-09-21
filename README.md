@@ -16,5 +16,10 @@ $: npm i typescript -g
 Install express and node @types as dev dependencies:
 $: npm i @types/ws @types/express -D
 
+Compile command:
+$ cd [YourFolder]
+$: ./node_modules/.bin/tsc
+$: node ./dist/server/ws.server
+
 
 
