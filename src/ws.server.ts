@@ -6,6 +6,7 @@
  import * as express from 'express'; //Framework NodeJS
  import * as http from 'http'; // Module server HTTP
  import * as WebSocket from 'ws'; // module server websocket
+import { isNullOrUndefined } from 'util';
 
  // initialization of new application express
  const app = express();
@@ -13,6 +14,7 @@
  const server = http.createServer(app);
 //initialization of websocket instance
  const wss = new WebSocket.Server({server});
+ var mess;
 // websocket server listenes to events
  wss.on('connection', (ws: WebSocket) => {
     // Create empty any variable to send clients data as a json
@@ -23,16 +25,41 @@
         // display message in the console and return a message to the client
         console.log('Reception: %s [%d]', message, new Date());
         //add dynamically an attribute message to the object envelop and give it the value message: any
-        envelop.message = 'This message : ' + message + ' was received.'
+        console.log('Stringify message : ' + JSON.stringify(message));
+        mess = JSON.parse(message);
+        console.log('test pares parse json ' + mess);
+        let m = mess.message;
+        let i = mess.id;
+        let d = mess.date;
+        console.log('message tout seul ? : ' + m);
+        console.log('id tout seul ? : ' + i);
+        console.log('date toute seul ? : ' + d);
+        if(m != undefined) {
+            envelop.message =  m;
+            envelop.id = i;
+            envelop.date = d;
+        } else {
+            envelop.id = 'Bot';
+            envelop.message ='New user joined the room.';
+        }
 
         // echo for transmitter 
+        console.log(JSON.stringify('enveloppe ? ' + envelop));
         ws.send(JSON.stringify(envelop));
 
         //Broadcast to all clients except the transmitter
         wss.clients.forEach(client => {
             // if it is not the transmitter
-            if (client != ws) {
-                envelop.message = 'New message : ' + message;
+            if (client != ws && m != undefined) {
+                console.log('Broadcasting to all : ' + m)
+                envelop.message = m;
+                envelop.id = i;
+                envelop.date = d;
+                client.send(JSON.stringify(envelop));
+                //client.send(envelop);
+            } else {
+                envelop.id = 'Bot';
+                envelop.message ='New user joined the room.';
                 client.send(JSON.stringify(envelop));
             }
         });
@@ -41,8 +68,9 @@
 
 
      // Immediately send a message to connected clients
+     envelop.id = 'Bot';
      envelop.message ='Welcome to the chat';
-     ws.send(JSON.stringify(envelop));
+     //ws.send(JSON.stringify(envelop));
  });
 
  //start server
